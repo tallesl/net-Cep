@@ -1,6 +1,7 @@
 ﻿namespace CepLibrary
 {
     using HtmlAgilityPack;
+    using System;
     using System.Globalization;
     using System.IO;
     using System.Net;
@@ -19,10 +20,26 @@
         /// <exception cref="ScrapException">If an unexpected HTML if found</exception>
         public static Endereco Scrap(string cep)
         {
-            return Parse(cep, Request(cep));
+            return Parse(cep, Request(cep, null));
         }
 
-        private static string Request(string cep)
+        /// <summary>
+        /// Requests the Correios' website for the given CEP's address, scraps the HTML and returns it.
+        /// </summary>
+        /// <param name="cep">CEP of the address</param>
+        /// <param name="proxy">Proxy to use for the request</param>
+        /// <returns>The scraped address or null if no address was found for the given CEP</returns>
+        /// <exception cref="ArgumentNullException">If the given proxy is null</exception>
+        /// <exception cref="ScrapException">If an unexpected HTML if found</exception>
+        public static Endereco Scrap(string cep, IWebProxy proxy)
+        {
+            if (proxy == null)
+                throw new ArgumentNullException("proxy");
+
+            return Parse(cep, Request(cep, proxy));
+        }
+
+        private static string Request(string cep, IWebProxy proxy)
         {
             var bytes = Encoding.ASCII.GetBytes(
                 string.Format(CultureInfo.InvariantCulture, "relaxation={0}&TipoCep=ALL&semelhante=N&cfm=1&Metodo=listaLogradouro&TipoConsulta=relaxation&StartRow=1&EndRow=10", cep)
@@ -32,6 +49,7 @@
             webRequest.ContentLength = bytes.Length;
             webRequest.ContentType = "application/x-www-form-urlencoded";
             webRequest.Method = "POST";
+            webRequest.Proxy = proxy ?? webRequest.Proxy;
 
             using (var stream = webRequest.GetRequestStream())
             {
