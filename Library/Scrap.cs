@@ -21,7 +21,7 @@
         /// <exception cref="ScrapException">If an unexpected HTML if found</exception>
         public static Endereco Scrap(string cep)
         {
-            return Parse(cep, Request(cep, null));
+            return Parse(Request(cep, null));
         }
 
         /// <summary>
@@ -37,7 +37,7 @@
             if (proxy == null)
                 throw new ArgumentNullException("proxy");
 
-            return Parse(cep, Request(cep, proxy));
+            return Parse(Request(cep, proxy));
         }
 
         private static string Request(string cep, IWebProxy proxy)
@@ -65,7 +65,7 @@
             }
         }
 
-        private static Endereco Parse(string cep, string html)
+        private static Endereco Parse(string html)
         {
             if (html.Contains("DADOS NAO ENCONTRADOS"))
                 return null;
