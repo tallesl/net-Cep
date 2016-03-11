@@ -1,6 +1,7 @@
 ﻿namespace CepLibrary
 {
     using HtmlAgilityPack;
+    using System.Globalization;
     using System.IO;
     using System.Net;
     using System.Text;
@@ -24,7 +25,7 @@
         private static string Request(string cep)
         {
             var bytes = Encoding.ASCII.GetBytes(
-                string.Format("relaxation={0}&TipoCep=ALL&semelhante=N&cfm=1&Metodo=listaLogradouro&TipoConsulta=relaxation&StartRow=1&EndRow=10", cep)
+                string.Format(CultureInfo.InvariantCulture, "relaxation={0}&TipoCep=ALL&semelhante=N&cfm=1&Metodo=listaLogradouro&TipoConsulta=relaxation&StartRow=1&EndRow=10", cep)
             );
 
             var webRequest = WebRequest.Create("http://www.buscacep.correios.com.br/servicos/dnec/consultaEnderecoAction.do");
@@ -54,17 +55,17 @@
                 doc.DocumentNode.SelectSingleNode("//div[@class='ctrlcontent']//div[@class='informativo2']");
             if (message != null)
             {
-                if (message.InnerHtml == string.Format("O endereço informado {0} não foi encontrado.", cep))
+                if (message.InnerHtml == string.Format(CultureInfo.InvariantCulture, "O endereço informado {0} não foi encontrado.", cep))
                     return null;
                 else
-                    throw new ScrapException(string.Format("Found \"{0}\" message.", message.InnerHtml));
+                    throw new ScrapException(string.Format(CultureInfo.InvariantCulture, "Found \"{0}\" message.", message.InnerHtml));
             }
 
             var fields = doc.DocumentNode.SelectNodes("//div[@class='ctrlcontent']//div/table[1]/tr/td");
             if (fields == null)
                 throw new ScrapException("Couldn't find any field.");
             else if (fields.Count != 5)
-                throw new ScrapException(string.Format("Unexpected number of fields: {0}.", fields.Count));
+                throw new ScrapException(string.Format(CultureInfo.InvariantCulture, "Unexpected number of fields: {0}.", fields.Count));
             else
                 return new Endereco
                 {
