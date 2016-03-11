@@ -39,7 +39,7 @@
         [TestMethod]
         public void ScrapNothing()
         {
-            var scraped = Cep.Scrap("00000000");
+            var scraped = Cep.Scrap("foo");
             Assert.AreEqual(null, scraped);
         }
 

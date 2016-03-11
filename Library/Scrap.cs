@@ -6,6 +6,7 @@
     using System.IO;
     using System.Net;
     using System.Text;
+    using System.Web;
 
     /// <summary>
     /// Scraps addresses from Correios' website.
@@ -42,10 +43,10 @@
         private static string Request(string cep, IWebProxy proxy)
         {
             var bytes = Encoding.ASCII.GetBytes(
-                string.Format(CultureInfo.InvariantCulture, "relaxation={0}&TipoCep=ALL&semelhante=N&cfm=1&Metodo=listaLogradouro&TipoConsulta=relaxation&StartRow=1&EndRow=10", cep)
+                string.Format(CultureInfo.InvariantCulture, "relaxation={0}&TipoCep=ALL&semelhante=N", cep)
             );
 
-            var webRequest = WebRequest.Create("http://www.buscacep.correios.com.br/servicos/dnec/consultaEnderecoAction.do");
+            var webRequest = WebRequest.Create("http://www.buscacep.correios.com.br/sistemas/buscacep/resultadoBuscaCepEndereco.cfm");
             webRequest.ContentLength = bytes.Length;
             webRequest.ContentType = "application/x-www-form-urlencoded";
             webRequest.Method = "POST";
@@ -66,33 +67,38 @@
 
         private static Endereco Parse(string cep, string html)
         {
+            if (html.Contains("DADOS NAO ENCONTRADOS"))
+                return null;
+
             var doc = new HtmlDocument();
             doc.LoadHtml(html);
 
-            var message = doc.DocumentNode.SelectSingleNode("//div[@class='ctrlcontent']//font[@color='black']") ??
-                doc.DocumentNode.SelectSingleNode("//div[@class='ctrlcontent']//div[@class='informativo2']");
-            if (message != null)
-            {
-                if (message.InnerHtml == string.Format(CultureInfo.InvariantCulture, "O endereço informado {0} não foi encontrado.", cep))
-                    return null;
-                else
-                    throw new ScrapException(string.Format(CultureInfo.InvariantCulture, "Found \"{0}\" message.", message.InnerHtml));
-            }
-
-            var fields = doc.DocumentNode.SelectNodes("//div[@class='ctrlcontent']//div/table[1]/tr/td");
+            var fields = doc.DocumentNode.SelectNodes("//table[@class=\"tmptabela\"]//tr[2]/td");
             if (fields == null)
                 throw new ScrapException("Couldn't find any field.");
-            else if (fields.Count != 5)
-                throw new ScrapException(string.Format(CultureInfo.InvariantCulture, "Unexpected number of fields: {0}.", fields.Count));
-            else
-                return new Endereco
-                {
-                    Cep = Sanitize(fields[4].InnerHtml),
-                    Logradouro = fields[0].InnerHtml,
-                    Bairro = fields[1].InnerHtml,
-                    Localidade = fields[2].InnerHtml,
-                    Uf = fields[3].InnerHtml
-                };
+
+            if (fields.Count != 4)
+                throw new ScrapException(string.Format(CultureInfo.InvariantCulture,
+                    "Unexpected number of fields: {0}.", fields.Count));
+
+            var localidadeUf = fields[2].InnerHtml.Trim().Split(new char[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
+            if (localidadeUf.Length != 2)
+                throw new ScrapException(string.Format(CultureInfo.InvariantCulture,
+                    "Unexpected Localidade/UF: {0}.", fields[2].InnerHtml));
+
+            return new Endereco
+            {
+                Cep = Sanitize(Clean(fields[3].InnerHtml)),
+                Logradouro = Clean(fields[0].InnerHtml),
+                Bairro = Clean(fields[1].InnerHtml),
+                Localidade = Clean(localidadeUf[0]),
+                Uf = Clean(localidadeUf[1])
+            };
+        }
+
+        private static string Clean(string field)
+        {
+            return HttpUtility.HtmlDecode(field).Trim();
         }
     }
 }
