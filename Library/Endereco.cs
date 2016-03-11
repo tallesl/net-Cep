@@ -1,4 +1,4 @@
-﻿namespace CepUtility
+﻿namespace CepLibrary
 {
     public class Endereco
     {

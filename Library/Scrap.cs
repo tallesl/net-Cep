@@ -1,4 +1,4 @@
-﻿namespace CepUtility
+﻿namespace CepLibrary
 {
     using HtmlAgilityPack;
     using System.IO;
@@ -8,7 +8,7 @@
     /// <summary>
     /// Scraps addresses from Correios' website.
     /// </summary>
-    public static class CepScraper
+    public static partial class Cep
     {
         /// <summary>
         /// Requests the Correios' website for the given CEP's address, scraps the HTML and returns it.
@@ -23,10 +23,9 @@
 
         private static string Request(string cep)
         {
-            var bytes =
-                Encoding.ASCII.GetBytes(
-                    string.Format("relaxation={0}&TipoCep=ALL&semelhante=N&cfm=1&Metodo=listaLogradouro&TipoConsulta=relaxation&StartRow=1&EndRow=10", cep)
-                );
+            var bytes = Encoding.ASCII.GetBytes(
+                string.Format("relaxation={0}&TipoCep=ALL&semelhante=N&cfm=1&Metodo=listaLogradouro&TipoConsulta=relaxation&StartRow=1&EndRow=10", cep)
+            );
 
             var webRequest = WebRequest.Create("http://www.buscacep.correios.com.br/servicos/dnec/consultaEnderecoAction.do");
             webRequest.ContentLength = bytes.Length;
@@ -55,23 +54,26 @@
                 doc.DocumentNode.SelectSingleNode("//div[@class='ctrlcontent']//div[@class='informativo2']");
             if (message != null)
             {
-                if (message.InnerHtml == string.Format("O endereço informado {0} não foi encontrado.", cep)) return null;
-                else throw new ScrapException(string.Format("Found \"{0}\" message.", message.InnerHtml));
+                if (message.InnerHtml == string.Format("O endereço informado {0} não foi encontrado.", cep))
+                    return null;
+                else
+                    throw new ScrapException(string.Format("Found \"{0}\" message.", message.InnerHtml));
             }
 
             var fields = doc.DocumentNode.SelectNodes("//div[@class='ctrlcontent']//div/table[1]/tr/td");
-            if (fields == null) throw new ScrapException("Couldn't find any field.");
+            if (fields == null)
+                throw new ScrapException("Couldn't find any field.");
             else if (fields.Count != 5)
                 throw new ScrapException(string.Format("Unexpected number of fields: {0}.", fields.Count));
-
-            return new Endereco
-            {
-                Cep = CepSanitizer.Sanitize(fields[4].InnerHtml),
-                Logradouro = fields[0].InnerHtml,
-                Bairro = fields[1].InnerHtml,
-                Localidade = fields[2].InnerHtml,
-                Uf = fields[3].InnerHtml
-            };
+            else
+                return new Endereco
+                {
+                    Cep = Sanitize(fields[4].InnerHtml),
+                    Logradouro = fields[0].InnerHtml,
+                    Bairro = fields[1].InnerHtml,
+                    Localidade = fields[2].InnerHtml,
+                    Uf = fields[3].InnerHtml
+                };
         }
     }
 }

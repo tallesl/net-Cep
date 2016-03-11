@@ -7,8 +7,8 @@
     <ProjectGuid>{78E3FA5B-2436-4F1E-85D0-FE1C5DA1DE10}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>CepUtility</RootNamespace>
-    <AssemblyName>CepUtility</AssemblyName>
+    <RootNamespace>CepLibrary</RootNamespace>
+    <AssemblyName>Cep</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -28,7 +28,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>bin\Release\CepUtility.xml</DocumentationFile>
+    <DocumentationFile>bin\Release\Cep.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="HtmlAgilityPack, Version=1.4.9.0, Culture=neutral, PublicKeyToken=bd319b19eaf3b43a, processorArchitecture=MSIL">
@@ -40,8 +40,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Endereco.cs" />
-    <Compile Include="CepScraper.cs" />
-    <Compile Include="CepSanitizer.cs" />
+    <Compile Include="Scrap.cs" />
+    <Compile Include="Sanitize.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ScrapException.cs" />
   </ItemGroup>

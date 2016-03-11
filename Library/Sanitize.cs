@@ -1,4 +1,4 @@
-﻿namespace CepUtility
+﻿namespace CepLibrary
 {
     using System;
     using System.Linq;
@@ -6,7 +6,7 @@
     /// <summary>
     /// Sanitizes CEPs.
     /// </summary>
-    public static class CepSanitizer
+    public static partial class Cep
     {
         /// <summary>
         /// Sanizites a CEP (Código de Endereçamento Postal).
@@ -17,7 +17,8 @@
         /// <returns>The given CEP without mask or null if the given CEP is not valid</returns>
         public static string Sanitize(string cep)
         {
-            if (cep == null) throw new ArgumentNullException("cep");
+            if (cep == null)
+                throw new ArgumentNullException("cep");
 
             // XXXXXXX
             var digitOnly =
@@ -37,10 +38,14 @@
                 cep[6] == '-' &&
                Enumerable.Range(0, 10).Except(new[] { 2, 6 }).All(i => Char.IsDigit(cep[i]));
 
-            if (digitOnly) return cep;
-            else if (withDash) return cep.Substring(0, 5) + cep.Substring(6, 3);
-            else if (withDot) return cep.Substring(0, 2) + cep.Substring(3, 3) + cep.Substring(7, 3);
-            else return null;
+            if (digitOnly)
+                return cep;
+            else if (withDash)
+                return cep.Substring(0, 5) + cep.Substring(6, 3);
+            else if (withDot)
+                return cep.Substring(0, 2) + cep.Substring(3, 3) + cep.Substring(7, 3);
+            else
+                return null;
         }
     }
 }
