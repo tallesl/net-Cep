@@ -18,7 +18,7 @@
         public static string Sanitize(string cep)
         {
             if (cep == null)
-                throw new ArgumentNullException("cep");
+                return null;
 
             // XXXXXXX
             var digitOnly =
