@@ -15,6 +15,8 @@
             Assert.AreEqual("30130010", Cep.Sanitize("30130010"));
             Assert.AreEqual("30130010", Cep.Sanitize("30130-010"));
             Assert.AreEqual("30130010", Cep.Sanitize("30.130-010"));
+            Assert.AreEqual("30130010", Cep.Sanitize(" 30130010"));
+            Assert.AreEqual("30130010", Cep.Sanitize("\t30130010\t"));
         }
 
         [TestMethod]

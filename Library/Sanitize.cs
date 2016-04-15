@@ -20,6 +20,8 @@
             if (cep == null)
                 return null;
 
+            cep = cep.Trim();
+
             // XXXXXXX
             var digitOnly =
                 cep.Length == 8 &&
